@@ -3,10 +3,9 @@ services:
     image: mysql:8.0
     container_name: mysqlcontainer
     command: --default-authentication-plugin=mysql_native_password
-    restart: unless-stopped
     volumes:
       - ./dbinit/init.sql:/docker-entrypoint-initdb.d/0_init.sql
-      - $HOME/database:/var/lib/mysql
+      - ~/database:/var/lib/mysql
     ports:
       - 3306:3306
     expose:
@@ -20,7 +19,22 @@ services:
       SERVICE_NAME: mysqldb
     networks:
       - internalnet
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - ./es-data:/usr/share/elasticsearch/data
+    networks:
+      - internalnet
 
 networks:
   internalnet:
     driver: bridge
+
+volumes:
+  es-data:
+  database:
