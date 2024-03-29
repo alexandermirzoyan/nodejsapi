@@ -4,7 +4,12 @@
   "license": "ISC",
   "author": "Alexandr Mirzoyan",
   "description": "NodeJs API with Express and MySQL",
-  "keywords": [ "NodeJs", "Express", "MySQL", "API"],
+  "keywords": [
+    "NodeJs",
+    "Express",
+    "MySQL",
+    "API"
+  ],
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -12,6 +17,7 @@
     "start:prod": "NODE_ENV=prod node src/index.js"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.13.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
