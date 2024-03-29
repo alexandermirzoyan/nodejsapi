@@ -5,7 +5,7 @@ import cors from 'cors';
 import patientRoutes from './route/patient.route.js';
 import Response from './domain/response.js';
 import logger from './util/logger.js';
-import { elasticSearchHealth } from './util/elasticSearchHealth.js';
+import { elasticHealth } from './config/elastic.config.js';
 
 dotenv.config();
 const PORT = process.env.SERVER_PORT || 3000;
@@ -17,8 +17,8 @@ app.use(express.json());
 app.use('/patients', patientRoutes);
 
 app.get('/elastic-health', async (_, res) => {
-  const elasticHealth = await elasticSearchHealth();
-  res.send(elasticHealth);
+  const elasticResponse = await elasticHealth();
+  res.send(elasticResponse);
 });
 
 app.get('/', (req, res) => {
