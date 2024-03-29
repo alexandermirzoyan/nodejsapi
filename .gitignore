@@ -37,6 +37,6 @@ Thumbs.db
 *.war
 
 # Large media files
-
+es-data
 .vscode
 db-data
