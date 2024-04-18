@@ -1,49 +1,49 @@
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import xml2js from 'xml2js';
 
-var parsePage = function(obj, callback) {
-  Object.getOwnPropertyNames(obj).forEach(function(val) {
-    if(val == "String") {
-      for(var i = 0; i < obj[val].length; i++) {
-        callback(obj[val][i]['$'].CONTENT);
-        if (i < obj[val].length-1) {
-          callback(' ');
-        } else {
-          callback("<br />\r\n");
-        }
-      }
-    }
-    else if(typeof(obj[val]) == "object" && val != "$") {
-      parsePage(obj[val], function(res) {
-        callback(res);
-      });
-    }
-  });
-};
+const parser = new xml2js.Parser();
 
-fs.readFile(path.resolve('src/ALTO/test.xml'), (err, data) => {
-  if (err) {
-    console.error('Error reading file:', err);
-    return;
+async function parseALTO(filePath) {
+  try {
+    const data = await fs.readFile(filePath);
+    const result = await parser.parseStringPromise(data);
+
+    return processALTOData(result);
+  } catch (err) {
+    console.error("Error processing the file:", err);
+    throw err;
+  }
+}
+
+function processALTOData(data) {
+  let allText = '';
+  const printSpaces = data.alto.Layout[0].Page[0].PrintSpace;
+
+  if (!printSpaces) {
+    return null;
   }
 
-  xml2js.parseString(data, (err, result) => {
-    if (err) {
-      console.error('Error parsing XML:', err);
-      return;
-    }
+  if (printSpaces) {
+    const textBlocks = printSpaces[0].TextBlock;
 
-    // Here you can process the parsed data according to the ALTO schema
-    console.log(result);
-    var page = result.alto.Layout[0].Page[0].PrintSpace;
-    if (!page) {
-      console.log('empty');
-      return;
-    }
+    textBlocks.forEach((block) => {
+      block.TextLine.forEach((line) => {
+        line.String.forEach((stringItem) => {
+          allText += stringItem.$.CONTENT + ' ';  // Assuming CONTENT holds the text
+        });
 
-    parsePage(page, function(text) {
-      console.log(text);
+        allText += '\n';  // New line after each text line
+      });
     });
-  });
-});
+  }
+
+  return allText.trim();  // Remove any leading/trailing whitespace
+}
+
+try {
+  const extractedText = await parseALTO(path.resolve('src/ALTO/test.xml'));
+  console.log(extractedText);
+} catch (err) {
+  console.error("Failed to extract text:", err);
+}
